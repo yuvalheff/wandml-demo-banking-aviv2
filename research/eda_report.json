@@ -1,0 +1,244 @@
+{
+  "eda_steps": [
+    {
+      "step_name": "Target Variable Distribution Analysis",
+      "step_description": "Analyzed the distribution of term deposit subscription outcomes to understand class imbalance in the dataset.",
+      "step_plot": "target_distribution.html",
+      "step_insights": [
+        "Dataset shows significant class imbalance with 88.3% non-subscribers vs 11.7% subscribers",
+        "Class imbalance requires stratified sampling and appropriate evaluation metrics like ROC-AUC",
+        "Total sample size of 40,689 provides sufficient data for machine learning model training"
+      ]
+    },
+    {
+      "step_name": "Job Type Distribution Analysis", 
+      "step_description": "Examined the distribution of client job types to understand the demographic composition of the banking dataset.",
+      "step_plot": "job_distribution.html",
+      "step_insights": [
+        "Blue-collar workers represent the largest group (8,776 clients), followed by management (8,523)",
+        "Professional distribution includes technicians (6,812), admin staff (4,640), and services (3,751)",
+        "Job type diversity suggests broad market reach across different professional segments"
+      ]
+    },
+    {
+      "step_name": "Age Distribution Analysis",
+      "step_description": "Analyzed client age distribution to understand the target demographic for term deposit campaigns.",
+      "step_plot": "age_distribution.html", 
+      "step_insights": [
+        "Age distribution is right-skewed with mean age of 40.9 years and median of 39 years",
+        "Age range spans from 18 to 95 years with 75% of clients under 48 years old",
+        "Young to middle-aged adults form the core customer base for marketing campaigns"
+      ]
+    },
+    {
+      "step_name": "Account Balance Distribution Analysis",
+      "step_description": "Examined client account balance distribution to understand financial profiles and potential outliers.",
+      "step_plot": "balance_distribution.html",
+      "step_insights": [
+        "Balance distribution is highly skewed with mean of €1,361 but median of only €448", 
+        "3,356 clients have negative balances, indicating overdraft usage",
+        "Extreme outliers exist with maximum balance of €98,417, requiring careful preprocessing"
+      ]
+    },
+    {
+      "step_name": "Feature Correlation Analysis",
+      "step_description": "Created correlation matrix to identify linear relationships between numerical features and target variable.",
+      "step_plot": "correlation_matrix.html",
+      "step_insights": [
+        "Duration shows strongest correlation with target (0.395), indicating call length importance",
+        "Previous campaign features (pdays, previous) show moderate correlations with success",
+        "Demographic features (age, balance) show weak correlations, suggesting non-linear relationships"
+      ]
+    },
+    {
+      "step_name": "Call Duration Outlier Analysis", 
+      "step_description": "Investigated call duration patterns by target outcome to identify outliers and success indicators using log-scale visualization.",
+      "step_plot": "duration_by_target.html",
+      "step_insights": [
+        "Successful calls average 537 seconds vs 221 seconds for unsuccessful calls",
+        "Duration shows clear separation between classes with successful calls being 2.4x longer",
+        "Outliers exist in both classes but successful campaigns have consistently longer durations"
+      ]
+    },
+    {
+      "step_name": "Previous Campaign Outcome Analysis",
+      "step_description": "Analyzed how previous campaign outcomes influence current campaign success rates to understand customer behavior patterns.",
+      "step_plot": "previous_campaign_outcome.html", 
+      "step_insights": [
+        "Clients with previous successful campaigns show 64.6% success rate vs 9.1% for unknown outcomes",
+        "Previous campaign success is the strongest categorical predictor of future success",
+        "Most clients (81%) have unknown previous outcomes, presenting opportunity for better data collection"
+      ]
+    },
+    {
+      "step_name": "Monthly Campaign Effectiveness Analysis",
+      "step_description": "Examined campaign success rates by month to identify seasonal patterns and optimal timing for marketing efforts.",
+      "step_plot": "monthly_success_rate.html",
+      "step_insights": [
+        "March shows highest success rate at 52.9%, followed by December (47.6%) and September (46.5%)",
+        "May campaigns have lowest success rate (6.7%) despite having highest volume (12,410 contacts)",
+        "Clear seasonal patterns suggest optimal timing strategies for campaign deployment"
+      ]
+    }
+  ],
+  "dataset_description": "Bank Marketing Dataset for Term Deposit Prediction containing 40,689 Portuguese banking clients with 17 features including demographics, campaign details, and previous marketing outcomes. Used for predicting term deposit subscription in direct marketing campaigns.",
+  "columns": [
+    {
+      "name": "age",
+      "data_type": "int64",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "numerical",
+      "description": "Client age in years (18-95 range)",
+      "additional_information": "Right-skewed distribution with mean 40.9 years, useful for demographic segmentation"
+    },
+    {
+      "name": "job", 
+      "data_type": "object",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "categorical",
+      "description": "Type of job (admin, blue-collar, entrepreneur, housemaid, management, retired, self-employed, services, student, technician, unemployed, unknown)",
+      "additional_information": "12 job categories with blue-collar and management being most common, requires encoding for ML"
+    },
+    {
+      "name": "marital",
+      "data_type": "object", 
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "categorical",
+      "description": "Marital status (divorced, married, single)",
+      "additional_information": "3 categories representing family status, may influence financial decision-making"
+    },
+    {
+      "name": "education",
+      "data_type": "object",
+      "is_feature": true, 
+      "is_target": false,
+      "feature_type": "categorical", 
+      "description": "Level of education (primary, secondary, tertiary, unknown)",
+      "additional_information": "4 education levels, potential proxy for income and financial literacy"
+    },
+    {
+      "name": "default",
+      "data_type": "object",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "categorical",
+      "description": "Has credit in default (no, yes)",
+      "additional_information": "Binary indicator of credit default status, critical for risk assessment"
+    },
+    {
+      "name": "balance", 
+      "data_type": "float64",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "numerical",
+      "description": "Average yearly balance in euros (can be negative for overdrafts)",
+      "additional_information": "Highly skewed with outliers, 8.2% have negative balances indicating overdrafts"
+    },
+    {
+      "name": "housing",
+      "data_type": "object",
+      "is_feature": true,
+      "is_target": false, 
+      "feature_type": "categorical",
+      "description": "Has housing loan (no, yes)",
+      "additional_information": "Binary indicator of existing housing loan, affects available disposable income"
+    },
+    {
+      "name": "loan",
+      "data_type": "object",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "categorical", 
+      "description": "Has personal loan (no, yes)",
+      "additional_information": "Binary indicator of personal loan status, another factor in financial capacity"
+    },
+    {
+      "name": "contact",
+      "data_type": "object",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "categorical",
+      "description": "Contact communication type (cellular, telephone, unknown)",
+      "additional_information": "3 contact methods, may influence campaign effectiveness and client engagement"
+    },
+    {
+      "name": "day",
+      "data_type": "int64", 
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "numerical",
+      "description": "Last contact day of the month (1-31)",
+      "additional_information": "Day of month for last contact, potential temporal pattern in effectiveness"
+    },
+    {
+      "name": "month",
+      "data_type": "object",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "categorical",
+      "description": "Last contact month of year (jan-dec)",
+      "additional_information": "12 months with strong seasonal patterns, March shows highest success rates"
+    },
+    {
+      "name": "duration",
+      "data_type": "float64",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "numerical", 
+      "description": "Last contact duration in seconds",
+      "additional_information": "Strongest predictor (r=0.395) with successful calls averaging 537s vs 221s for failures"
+    },
+    {
+      "name": "campaign",
+      "data_type": "int64",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "numerical",
+      "description": "Number of contacts performed during this campaign for this client",
+      "additional_information": "Contact frequency indicator, higher values may indicate persistence or client resistance"
+    },
+    {
+      "name": "pdays", 
+      "data_type": "float64",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "numerical",
+      "description": "Number of days since client was last contacted from previous campaign (-1 means never contacted)",
+      "additional_information": "Time since last contact, -1 for first-time contacts, affects client receptiveness"
+    },
+    {
+      "name": "previous",
+      "data_type": "float64",
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "numerical", 
+      "description": "Number of contacts performed before this campaign for this client",
+      "additional_information": "Historical contact count, indicates client relationship depth and engagement level"
+    },
+    {
+      "name": "poutcome",
+      "data_type": "object", 
+      "is_feature": true,
+      "is_target": false,
+      "feature_type": "categorical",
+      "description": "Outcome of previous marketing campaign (failure, other, success, unknown)",
+      "additional_information": "Most powerful categorical predictor - 64.6% success for previous successes vs 9.1% unknown"
+    },
+    {
+      "name": "y",
+      "data_type": "int64",
+      "is_feature": false,
+      "is_target": true,
+      "feature_type": "target",
+      "description": "Target variable: has client subscribed to term deposit (0=no, 1=yes)",
+      "additional_information": "Binary classification target with 11.7% positive class (imbalanced dataset)"
+    }
+  ],
+  "task_type": "binary_classification", 
+  "target_column": "y",
+  "eda_summary": "The dataset presents a classic imbalanced binary classification problem with 88.3% non-subscribers. Key findings: (1) Duration is the strongest numerical predictor (r=0.395) with successful calls being 2.4x longer, (2) Previous campaign outcome is the most powerful categorical feature with 64.6% success rate for prior successes, (3) Strong seasonal patterns exist with March campaigns showing 52.9% success vs 6.7% in May, (4) Balance distribution is highly skewed with 8.2% negative balances, requiring careful preprocessing, (5) No missing values but several features have 'unknown' categories that need handling, (6) Job and demographic features show weak linear correlations but may have non-linear relationships. The dataset is well-suited for ROC-AUC optimization with proper handling of class imbalance through stratified sampling and appropriate algorithms.",
+  "task_summary_for_chat": "## 🔍 **Comprehensive EDA Completed for Bank Marketing Dataset**\n\n### **Dataset Overview**\n- **40,689 clients** with **17 features** for term deposit prediction\n- **Zero missing values** but several 'unknown' categories to handle\n- **Highly imbalanced**: 88.3% non-subscribers vs 11.7% subscribers\n\n### **🎯 Key Insights Discovered**\n\n**📞 Call Duration is King**\n- Strongest predictor (correlation = 0.395)\n- Successful calls average **537 seconds** vs 221 for failures\n- Clear separation between success/failure patterns\n\n**📈 Previous Success Predicts Future Success** \n- Clients with prior successful campaigns: **64.6% success rate**\n- Unknown previous outcomes: only **9.1% success**\n- Most powerful categorical predictor identified\n\n**📅 Seasonal Patterns Matter**\n- **March campaigns**: 52.9% success rate (highest)\n- **May campaigns**: 6.7% success rate (lowest, despite highest volume)\n- Clear timing optimization opportunities\n\n**💰 Financial Profile Insights**\n- Balance highly skewed (mean €1,361, median €448)\n- **8.2% clients** have negative balances (overdrafts)\n- Extreme outliers require preprocessing\n\n### **🔧 ML Pipeline Recommendations**\n- Use **stratified sampling** for train/test splits\n- Focus on **ROC-AUC** metric for imbalanced data\n- **Feature engineering** around duration thresholds\n- **Seasonal features** from month data\n- **Outlier handling** for balance and duration\n- **Encoding strategies** for categorical variables\n\n### **📊 Interactive Plots Generated**\nCreated 8 professional interactive visualizations covering all key aspects: target distribution, demographics, correlations, outliers, and campaign effectiveness patterns."
+}
