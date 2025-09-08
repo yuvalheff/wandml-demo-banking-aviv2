@@ -1,0 +1,75 @@
+{
+  "experiment_name": "Cost-Sensitive Gradient Boosting",
+  "experiment_description": "Replace SMOTE oversampling with cost-sensitive learning using sample weights to address severe class imbalance, aiming to achieve >93% ROC-AUC and 60-70% recall targets.",
+  "iteration_number": 3,
+  "change_from_previous": "Replace SMOTE oversampling technique with cost-sensitive learning using balanced sample weights in Gradient Boosting model.",
+  "preprocessing_steps": {
+    "target_encoding": "Convert target column from 1/2 encoding to 0/1 binary encoding (subtract 1 from all values)",
+    "column_mapping": "Rename V1-V16 columns to original names: V1→age, V2→job, V3→marital, V4→education, V5→default, V6→balance, V7→housing, V8→loan, V9→contact, V10→day, V11→month, V12→duration, V13→campaign, V14→pdays, V15→previous, V16→poutcome",
+    "categorical_encoding": "Apply LabelEncoder to categorical columns: ['job', 'marital', 'education', 'default', 'housing', 'loan', 'contact', 'month', 'poutcome']",
+    "numerical_scaling": "No scaling required for tree-based models",
+    "missing_values": "No missing values present in dataset",
+    "outlier_handling": "No outlier removal - tree-based models are robust to outliers"
+  },
+  "feature_engineering_steps": {
+    "reuse_previous_features": "Implement the same 44 engineered features from iteration 2 that proved effective",
+    "duration_transformations": "Create log_duration, sqrt_duration, and duration_binned (short/medium/long/very_long based on quantiles)",
+    "balance_indicators": "Create has_positive_balance, balance_log_transform (handle negatives), and balance_quartile features",
+    "campaign_interactions": "Create age_balance_ratio, duration_per_contact (duration/campaign), and contact_efficiency features",
+    "temporal_features": "Create cyclical encodings for day and month using sin/cos transformations",
+    "demographic_combinations": "Create job_education_combo, marital_housing_combo, and other relevant categorical combinations",
+    "previous_campaign_features": "Engineer days_since_contact_binned, previous_success_indicator, and campaign_history_score",
+    "feature_selection": "Use all 44 engineered features based on previous iteration's success"
+  },
+  "model_selection_steps": {
+    "primary_algorithm": "GradientBoostingClassifier with cost-sensitive learning via sample weights",
+    "model_parameters": {
+      "n_estimators": 200,
+      "max_depth": 8,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "max_features": "sqrt",
+      "random_state": 42,
+      "validation_fraction": 0.1,
+      "n_iter_no_change": 20,
+      "tol": 1e-4
+    },
+    "cost_sensitive_approach": "Apply balanced sample weights using inverse class frequency: weight_minority = n_majority / n_minority ≈ 7.55",
+    "sample_weight_calculation": "sample_weights = np.where(y_train == 1, class_counts[0] / class_counts[1], 1.0)",
+    "validation_strategy": "5-fold Stratified Cross-Validation to ensure reliable performance estimates",
+    "hyperparameter_tuning": "No grid search - use proven parameters from exploration with cost-sensitive focus"
+  },
+  "evaluation_strategy": {
+    "primary_metric": "ROC-AUC (target: >93.0%)",
+    "secondary_metrics": ["Recall (target: 60-70%)", "Precision (target: >45%)", "F1-Score (target: >55%)", "Balanced Accuracy", "Matthews Correlation Coefficient"],
+    "threshold_optimization": "Evaluate performance at multiple thresholds (0.1, 0.2, 0.3, 0.4, 0.5) to find optimal recall-precision balance",
+    "business_metrics": "Calculate campaign efficiency metrics: conversion rate, contacts needed per success, cost-effectiveness",
+    "error_analysis": {
+      "confusion_matrix_analysis": "Detailed breakdown of TP, FP, TN, FN with focus on reducing false negatives",
+      "feature_importance_analysis": "Analyze top contributing features and compare with previous iterations",
+      "prediction_confidence_analysis": "Examine prediction probability distributions for both classes",
+      "slice_analysis": "Performance analysis by key segments (age groups, job types, previous campaign outcomes)",
+      "calibration_assessment": "Evaluate probability calibration using calibration plots and Brier score"
+    },
+    "comparison_with_previous": "Direct comparison with iteration 2 SMOTE results on same test set",
+    "visualization_outputs": ["confusion_matrix.html", "roc_curve.html", "precision_recall_curve.html", "feature_importance.html", "calibration_plot.html"]
+  },
+  "expected_outcomes": {
+    "target_improvements": {
+      "roc_auc": ">93.0% (vs 92.6% in iteration 2)",
+      "recall": "80-86% (vs 52.17% in iteration 2)", 
+      "precision": "45-50% (maintain reasonable precision while maximizing recall)",
+      "f1_score": "58-62% (vs 56.73% in iteration 2)"
+    },
+    "business_impact": "Identify ~86% of potential subscribers while maintaining campaign efficiency through cost-sensitive learning",
+    "model_interpretability": "Clear feature importance rankings and decision boundary analysis",
+    "deployment_readiness": "Well-calibrated probabilities suitable for business threshold optimization"
+  },
+  "implementation_notes": {
+    "key_differences_from_iteration2": "Replace data augmentation (SMOTE) with algorithmic approach (sample weights) - no synthetic data generation",
+    "computational_efficiency": "Faster training than SMOTE as no data resampling required",
+    "memory_requirements": "Lower memory usage compared to SMOTE approach",
+    "reproducibility": "Ensure random_state=42 across all components for consistent results",
+    "validation_approach": "Use same train/test split as previous iterations for fair comparison"
+  }
+}

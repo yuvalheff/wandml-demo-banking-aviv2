@@ -1,8 +1,8 @@
 data_prep:
-  version: "1.0"
+  version: "3.0"
   dataset_name: "bank_marketing_term_deposit_prediction"
-  onehot_encode_columns: ["job", "education", "poutcome"]
-  label_encode_columns: ["marital", "default", "housing", "loan", "contact", "month"]
+  onehot_encode_columns: []  # Using label encoding for all categorical columns per experiment plan
+  label_encode_columns: ["job", "marital", "education", "default", "housing", "loan", "contact", "month", "poutcome"]
 
 feature_prep:
   enable_duration_features: true
@@ -21,11 +21,14 @@ model:
   model_type: "gradient_boosting"
   model_params:
     n_estimators: 200
-    max_depth: 6
-    learning_rate: 0.1
+    max_depth: 8
+    learning_rate: 0.05
     subsample: 0.8
     max_features: "sqrt"
     random_state: 42
+    validation_fraction: 0.1
+    n_iter_no_change: 20
+    tol: 0.0001
 
 
 

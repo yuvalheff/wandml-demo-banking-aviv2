@@ -5,7 +5,7 @@ import sklearn
 from pathlib import Path
 import os
 import json
-from imblearn.over_sampling import SMOTE
+# Cost-sensitive learning approach - no oversampling needed
 
 from bank_marketing_term_deposit_prediction.pipeline.feature_preprocessing import FeatureProcessor
 from bank_marketing_term_deposit_prediction.pipeline.data_preprocessing import DataProcessor
@@ -77,19 +77,21 @@ class Experiment:
             X_train_features = feature_processor.transform(X_train)
             print(f"✅ Feature engineering complete. Shape: {X_train_features.shape}")
             
-            # 5. Apply SMOTE oversampling to balance training data
-            print("⚖️ Applying SMOTE oversampling...")
-            print(f"Before SMOTE - Class distribution: {np.bincount(y_train)}")
+            # 5. Apply cost-sensitive learning with balanced sample weights
+            print("⚖️ Applying cost-sensitive learning with balanced sample weights...")
+            print(f"Class distribution: {np.bincount(y_train)}")
             
-            smote = SMOTE(k_neighbors=5, random_state=seed)
-            X_train_smote, y_train_smote = smote.fit_resample(X_train_features, y_train)
+            # Calculate balanced sample weights - minority class gets higher weight
+            class_counts = np.bincount(y_train)
+            minority_weight = class_counts[0] / class_counts[1]  # ~7.55 based on class imbalance
+            sample_weights = np.where(y_train == 1, minority_weight, 1.0)
             
-            print(f"After SMOTE - Class distribution: {np.bincount(y_train_smote)}")
-            print(f"Training data shape after SMOTE: {X_train_smote.shape}")
+            print(f"Sample weights - Class 0: 1.0, Class 1: {minority_weight:.2f}")
+            print(f"Total weighted samples: {np.sum(sample_weights):.0f}")
             
-            # 6. Train model on SMOTE-enhanced data
-            print("🔄 Training model on SMOTE-enhanced data...")
-            model_wrapper.fit(X_train_smote, y_train_smote)
+            # 6. Train model with cost-sensitive learning
+            print("🔄 Training model with cost-sensitive learning...")
+            model_wrapper.fit(X_train_features, y_train, sample_weight=sample_weights)
             print("✅ Model training complete")
             
             # 7. Process test data
@@ -119,8 +121,13 @@ class Experiment:
             print("🔧 Creating ModelPipeline...")
             pipeline = ModelPipeline(data_processor, feature_processor, model_wrapper)
             
-            # Test pipeline with sample data
-            sample_data = test_df.head(3).drop(columns=['y'] if 'y' in test_df.columns else [])
+            # Test pipeline with sample data (remove both possible target column names)
+            columns_to_drop = []
+            if 'y' in test_df.columns:
+                columns_to_drop.append('y')
+            if 'target' in test_df.columns:
+                columns_to_drop.append('target')
+            sample_data = test_df.head(3).drop(columns=columns_to_drop)
             sample_predictions = pipeline.predict(sample_data)
             sample_probabilities = pipeline.predict_proba(sample_data)
             print(f"✅ Pipeline test successful. Sample predictions: {sample_predictions}")
@@ -144,7 +151,7 @@ class Experiment:
             )
             
             # Conditionally log to MLflow if run ID is provided
-            active_run_id = "55d5aadc00d34e5abbe22df6e0c68855"
+            active_run_id = "045bc1e5653346bcac6691b1683814d7"
             logged_model_uri = None
             
             if active_run_id and active_run_id != 'None' and active_run_id.strip():

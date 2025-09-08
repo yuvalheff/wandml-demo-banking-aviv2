@@ -1,0 +1,138 @@
+{
+  "experiment_name": "SMOTE Enhanced Gradient Boosting",
+  "experiment_iteration": 2,
+  "timestamp": "2025-09-08T17:52:22.278031Z",
+  "primary_metric": {
+    "name": "roc_auc",
+    "value": 0.926,
+    "target": 0.93,
+    "achieved": false
+  },
+  "comprehensive_metrics": {
+    "roc_auc": 0.926,
+    "accuracy": 0.9069,
+    "balanced_accuracy": 0.7398,
+    "precision": 0.6216,
+    "recall": 0.5217,
+    "f1_score": 0.5673,
+    "specificity": 0.9579,
+    "matthews_correlation": 0.5181,
+    "average_precision": 0.6144,
+    "log_loss": 0.2078,
+    "brier_score": 0.0642,
+    "false_positive_rate": 0.0421,
+    "false_negative_rate": 0.4783,
+    "negative_predictive_value": 0.938
+  },
+  "confusion_matrix": {
+    "true_negatives": 3825,
+    "false_positives": 168,
+    "false_negatives": 253,
+    "true_positives": 276,
+    "total_samples": 4522
+  },
+  "target_achievement": {
+    "roc_auc": {
+      "target": "> 0.93",
+      "achieved": 0.926,
+      "status": "missed",
+      "gap": -0.004
+    },
+    "recall": {
+      "target": "0.60-0.70",
+      "achieved": 0.5217,
+      "status": "missed",
+      "gap": -0.0783
+    },
+    "precision": {
+      "target": "> 0.45",
+      "achieved": 0.6216,
+      "status": "exceeded",
+      "gap": 0.1716
+    },
+    "f1_score": {
+      "target": "> 0.55",
+      "achieved": 0.5673,
+      "status": "exceeded", 
+      "gap": 0.0173
+    }
+  },
+  "iteration_comparison": {
+    "iteration_1": {
+      "roc_auc": 0.938,
+      "precision": 0.64,
+      "recall": 0.461,
+      "f1_score": 0.536
+    },
+    "iteration_2": {
+      "roc_auc": 0.926,
+      "precision": 0.6216,
+      "recall": 0.5217,
+      "f1_score": 0.5673
+    },
+    "improvements": {
+      "recall": 0.132,
+      "f1_score": 0.058
+    },
+    "regressions": {
+      "roc_auc": -0.012,
+      "precision": -0.029
+    }
+  },
+  "business_impact": {
+    "total_potential_subscribers": 529,
+    "correctly_identified": 276,
+    "missed_opportunities": 253,
+    "identification_rate": 0.5217,
+    "precision_among_flagged": 0.6216,
+    "class_imbalance_ratio": 7.55
+  },
+  "technical_details": {
+    "algorithm": "Gradient Boosting Classifier",
+    "smote_applied": true,
+    "features_engineered": 44,
+    "original_features": 16,
+    "out_of_bag_score": 0.2059,
+    "training_samples_after_smote": "~71,858 (balanced)"
+  },
+  "key_achievements": [
+    "Improved recall by 13.2% from iteration 1 (46.1% → 52.17%)",
+    "Enhanced F1-score by 5.8% (53.6% → 56.73%)", 
+    "Exceeded precision target (62.16% > 45%)",
+    "Exceeded F1-score target (56.73% > 55%)",
+    "Maintained high specificity at 95.79%"
+  ],
+  "key_limitations": [
+    "ROC-AUC fell short of target (92.6% vs >93%)",
+    "Recall missed ambitious target range (52.17% vs 60-70%)",
+    "High false negative rate (47.83%) still problematic",
+    "SMOTE alone insufficient for severe class imbalance"
+  ],
+  "future_recommendations": [
+    "Explore advanced sampling techniques (ADASYN, BorderlineSMOTE)",
+    "Implement cost-sensitive learning approaches",
+    "Optimize classification threshold for business objectives",
+    "Investigate ensemble methods combining multiple sampling strategies"
+  ],
+  "artifacts": {
+    "model_files": [
+      "trained_models.pkl",
+      "feature_processor.pkl", 
+      "data_processor.pkl"
+    ],
+    "visualizations": [
+      "roc_curve.html",
+      "precision_recall_curve.html",
+      "confusion_matrix.html",
+      "calibration_plot.html",
+      "feature_importance.html",
+      "prediction_distribution.html"
+    ],
+    "mlflow_model": {
+      "path": "output/model_artifacts/mlflow_model/",
+      "uri": "models:/m-bcaea5449ca1460ab2ecd80a48da99cd",
+      "framework": "sklearn",
+      "version": "1.7.1"
+    }
+  }
+}

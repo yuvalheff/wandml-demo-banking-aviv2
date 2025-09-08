@@ -29,13 +29,14 @@ class ModelWrapper:
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
 
-    def fit(self, X: pd.DataFrame, y):
+    def fit(self, X: pd.DataFrame, y, sample_weight=None):
         """
-        Fit the classifier to the training data.
+        Fit the classifier to the training data with optional sample weights for cost-sensitive learning.
 
         Parameters:
         X: Training features.
         y: Target labels (pandas Series or numpy array).
+        sample_weight: Optional sample weights for cost-sensitive learning.
 
         Returns:
         self: Fitted classifier.
@@ -45,8 +46,12 @@ class ModelWrapper:
         # Accept both pandas Series and numpy arrays
         if not (isinstance(y, pd.Series) or hasattr(y, '__array__')):
             raise ValueError("y must be a pandas Series or numpy array")
-            
-        self.model.fit(X, y)
+        
+        # Apply sample weights for cost-sensitive learning if provided
+        if sample_weight is not None:
+            self.model.fit(X, y, sample_weight=sample_weight)
+        else:
+            self.model.fit(X, y)
         self.is_fitted = True
         return self
 
