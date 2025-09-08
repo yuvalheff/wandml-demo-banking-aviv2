@@ -11,25 +11,31 @@ class ConfigParsingFailed(Exception):
 class DataConfig:
     version: str
     dataset_name: str
-    placeholder: Any
+    onehot_encode_columns: List[str]
+    label_encode_columns: List[str]
 
 
 @dataclass
 class FeaturesConfig:
-    placeholder: Any
+    enable_duration_features: bool
+    enable_balance_features: bool
+    enable_campaign_features: bool
+    enable_seasonal_features: bool
+    enable_previous_outcome_features: bool
 
 
 @dataclass
 class ModelEvalConfig:
-    split_ratio: float
-    placeholder: Any
+    cv_folds: int
+    stratified: bool
+    primary_metric: str
+    random_state: int
 
 
 @dataclass
 class ModelConfig:
     model_type: str
     model_params: Dict[str, Any]
-    placeholder: Any
 
 
 @dataclass

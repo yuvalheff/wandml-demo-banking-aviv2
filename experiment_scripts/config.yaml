@@ -1,20 +1,29 @@
 data_prep:
-  dataset: "name"
-  version: "version"
-  dataset_name: "dataset_name"
-  placeholder: "placeholder"
-  
+  version: "1.0"
+  dataset_name: "bank_marketing_term_deposit_prediction"
+  onehot_encode_columns: ["job", "month"]
+  label_encode_columns: ["marital", "education", "default", "housing", "loan", "contact", "poutcome"]
+
 feature_prep:
-  placeholder: "placeholder"
+  enable_duration_features: true
+  enable_balance_features: true
+  enable_campaign_features: true
+  enable_seasonal_features: true
+  enable_previous_outcome_features: true
 
 model_evaluation:
-    split_ratio: 0.2
-    placeholder: "placeholder"
+  cv_folds: 5
+  stratified: true
+  primary_metric: "roc_auc"
+  random_state: 42
 
 model:
-    model_type: "model_type"
-    model_params: Dict[str, Any]
-    placeholder: "placeholder"
+  model_type: "gradient_boosting"
+  model_params:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.1
+    random_state: 42
 
 
 
