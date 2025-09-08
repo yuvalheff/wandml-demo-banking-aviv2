@@ -1,8 +1,8 @@
 data_prep:
   version: "1.0"
   dataset_name: "bank_marketing_term_deposit_prediction"
-  onehot_encode_columns: ["job", "month"]
-  label_encode_columns: ["marital", "education", "default", "housing", "loan", "contact", "poutcome"]
+  onehot_encode_columns: ["job", "education", "poutcome"]
+  label_encode_columns: ["marital", "default", "housing", "loan", "contact", "month"]
 
 feature_prep:
   enable_duration_features: true
@@ -23,6 +23,8 @@ model:
     n_estimators: 200
     max_depth: 6
     learning_rate: 0.1
+    subsample: 0.8
+    max_features: "sqrt"
     random_state: 42
 
 

@@ -1,0 +1,209 @@
+{
+  "experiment_name": "SMOTE Enhanced Gradient Boosting",
+  "experiment_iteration": 2,
+  "experiment_objective": "Improve recall from 46.1% to 60-70% while maintaining ROC-AUC > 0.93 using SMOTE oversampling technique",
+  "primary_change_from_previous": "Implementation of SMOTE oversampling to address severe class imbalance (88.3% vs 11.7%)",
+  
+  "preprocessing_steps": {
+    "target_encoding": {
+      "description": "Convert target variable from 1/2 encoding to 0/1 binary encoding",
+      "implementation": "Apply transformation: y = y - 1 to both train and test sets"
+    },
+    "categorical_encoding": {
+      "high_cardinality": {
+        "columns": ["job", "education", "poutcome"],
+        "method": "One-hot encoding with drop_first=False",
+        "rationale": "High cardinality categorical features benefit from one-hot encoding to capture all category relationships"
+      },
+      "low_cardinality": {
+        "columns": ["marital", "default", "housing", "loan", "contact", "month"],
+        "method": "Label encoding",
+        "rationale": "Low cardinality features can use label encoding without losing information"
+      }
+    },
+    "missing_values": {
+      "description": "No missing values detected in dataset - no imputation needed",
+      "validation": "Confirm zero missing values across all 16 feature columns"
+    }
+  },
+  
+  "feature_engineering_steps": {
+    "duration_features": {
+      "duration_log": "np.log1p(duration) - Log transformation to handle skewness and outliers",
+      "duration_sqrt": "np.sqrt(duration) - Square root transformation as alternative normalization",
+      "rationale": "Duration features showed 37.2% combined importance in previous iteration"
+    },
+    "balance_features": {
+      "balance_log": "np.log1p(balance - balance.min() + 1) - Log transform handling negative balances",
+      "balance_positive": "(balance > 0).astype(int) - Binary indicator for positive balance",
+      "rationale": "Balance distribution is highly skewed with 8.2% negative values requiring transformation"
+    },
+    "campaign_features": {
+      "campaign_per_previous": "campaign / (previous + 1) - Campaign intensity relative to history",
+      "pdays_binary": "(pdays != -1).astype(int) - Binary indicator for previous contact",
+      "rationale": "Previous campaign features showed moderate correlation with success"
+    },
+    "temporal_features": {
+      "day_sin": "np.sin(2 * np.pi * day / 31) - Cyclical encoding of day of month",
+      "day_cos": "np.cos(2 * np.pi * day / 31) - Cyclical encoding of day of month",
+      "is_month_end": "(day >= 28).astype(int) - Binary indicator for month-end timing",
+      "rationale": "Capture cyclical patterns in contact timing that may affect success rates"
+    },
+    "interaction_features": {
+      "age_balance_ratio": "age / (abs(balance) + 1) - Age-wealth interaction",
+      "duration_campaign_ratio": "duration / (campaign + 1) - Call efficiency per campaign contact",
+      "rationale": "Create meaningful interactions between demographic and behavioral features"
+    }
+  },
+  
+  "class_imbalance_handling": {
+    "method": "SMOTE (Synthetic Minority Oversampling Technique)",
+    "parameters": {
+      "sampling_strategy": "auto",
+      "k_neighbors": 5,
+      "random_state": 42
+    },
+    "implementation_details": {
+      "apply_after": "Feature engineering and encoding",
+      "apply_before": "Model training",
+      "validation_strategy": "Use original unbalanced test set for evaluation to maintain realistic performance assessment"
+    },
+    "expected_impact": {
+      "training_samples": "Increase minority class from 4,760 to ~35,929 samples (balanced dataset)",
+      "recall_improvement": "Target improvement from 46.1% to 60-70%",
+      "roc_auc_maintenance": "Maintain ROC-AUC > 0.93 (exploration showed 0.909)"
+    }
+  },
+  
+  "model_selection": {
+    "algorithm": "Gradient Boosting Classifier",
+    "rationale": "Proven excellent performance in iteration 1 (ROC-AUC 0.938) with strong feature importance interpretability",
+    "hyperparameters": {
+      "n_estimators": 200,
+      "max_depth": 6,
+      "learning_rate": 0.1,
+      "subsample": 0.8,
+      "max_features": "sqrt",
+      "random_state": 42
+    },
+    "hyperparameter_rationale": {
+      "n_estimators": "200 provides good balance between performance and training time",
+      "max_depth": "6 prevents overfitting while capturing complex patterns",
+      "subsample": "0.8 introduces randomness to improve generalization",
+      "max_features": "sqrt reduces overfitting in high-dimensional space"
+    }
+  },
+  
+  "evaluation_strategy": {
+    "cross_validation": {
+      "method": "5-fold Stratified Cross-Validation",
+      "rationale": "Stratified sampling maintains class distribution across folds for reliable evaluation",
+      "metrics": ["roc_auc", "precision", "recall", "f1"]
+    },
+    "test_evaluation": {
+      "primary_metric": "ROC-AUC",
+      "target_value": "> 0.93",
+      "secondary_metrics": [
+        {
+          "metric": "Recall",
+          "target": "60-70%",
+          "description": "Improve minority class identification"
+        },
+        {
+          "metric": "Precision",
+          "target": "> 0.45",
+          "description": "Maintain reasonable precision to control false positives"
+        },
+        {
+          "metric": "F1-Score",
+          "target": "> 0.55",
+          "description": "Balance between precision and recall"
+        }
+      ]
+    },
+    "diagnostic_analyses": {
+      "confusion_matrix": "Analyze false positive/negative patterns and business impact",
+      "roc_curve": "Visualize discriminative performance across all thresholds",
+      "precision_recall_curve": "Assess performance trade-offs for imbalanced dataset",
+      "feature_importance": "Identify most predictive features and validate engineering success",
+      "calibration_plot": "Assess prediction confidence and probability calibration",
+      "class_distribution_analysis": "Compare SMOTE synthetic samples with original data patterns"
+    },
+    "business_metrics": {
+      "cost_benefit_analysis": "Calculate business impact using campaign cost vs conversion value",
+      "threshold_optimization": "Find optimal classification threshold for business objectives",
+      "coverage_analysis": "Assess percentage of potential subscribers identified by model"
+    }
+  },
+  
+  "expected_outputs": {
+    "model_artifacts": {
+      "trained_model": "Serialized Gradient Boosting model with SMOTE preprocessing pipeline",
+      "feature_encoder": "Preprocessing pipeline including categorical encoders and feature engineering",
+      "smote_transformer": "Fitted SMOTE transformer for potential future use"
+    },
+    "evaluation_reports": {
+      "performance_summary": "Comprehensive metrics comparing iteration 1 vs iteration 2 results",
+      "feature_analysis": "Updated feature importance rankings with SMOTE impact assessment",
+      "business_impact": "ROI analysis and campaign optimization recommendations"
+    },
+    "visualizations": {
+      "performance_plots": [
+        "roc_curve.html",
+        "precision_recall_curve.html",
+        "confusion_matrix.html",
+        "calibration_plot.html"
+      ],
+      "feature_plots": [
+        "feature_importance.html",
+        "smote_distribution_comparison.html"
+      ],
+      "diagnostic_plots": [
+        "threshold_optimization.html",
+        "class_balance_impact.html"
+      ]
+    },
+    "mlflow_logging": {
+      "model_registration": "Register model with version 2 tag and SMOTE metadata",
+      "experiment_tracking": "Log all metrics, parameters, and artifacts for comparison",
+      "model_signature": "Include input/output schema for production deployment"
+    }
+  },
+  
+  "success_criteria": {
+    "primary": "ROC-AUC >= 0.93 (maintain discriminative performance)",
+    "secondary": "Recall >= 0.60 (significant improvement from 46.1%)",
+    "tertiary": "Precision >= 0.45 (reasonable false positive control)",
+    "business": "F1-Score >= 0.55 (balanced performance for campaign optimization)"
+  },
+  
+  "risk_mitigation": {
+    "overfitting_prevention": {
+      "cross_validation": "5-fold CV to detect overfitting on SMOTE-enhanced training set",
+      "regularization": "Use subsample=0.8 and max_features='sqrt' for regularization",
+      "early_stopping": "Monitor validation metrics during training"
+    },
+    "synthetic_data_quality": {
+      "distribution_validation": "Compare SMOTE synthetic samples with original minority class",
+      "feature_correlation_preservation": "Ensure SMOTE maintains original feature relationships",
+      "boundary_analysis": "Verify synthetic samples don't create unrealistic feature combinations"
+    }
+  },
+  
+  "iteration_comparison": {
+    "iteration_1_baseline": {
+      "roc_auc": 0.938,
+      "precision": 0.64,
+      "recall": 0.461,
+      "f1_score": 0.536,
+      "key_limitation": "Poor recall due to class imbalance - only captures 46% of subscribers"
+    },
+    "iteration_2_targets": {
+      "roc_auc": "> 0.93",
+      "precision": "> 0.45",
+      "recall": "0.60-0.70",
+      "f1_score": "> 0.55",
+      "key_improvement": "SMOTE oversampling to significantly improve minority class detection"
+    }
+  }
+}

@@ -10,11 +10,13 @@ from bank_marketing_term_deposit_prediction.config import DataConfig
 class DataProcessor(BaseEstimator, TransformerMixin):
     def __init__(self, config: DataConfig):
         self.config: DataConfig = config
+        # Column mapping from V1-V16 to meaningful names
         self.column_mapping = {
             'V1': 'age', 'V2': 'job', 'V3': 'marital', 'V4': 'education', 
             'V5': 'default', 'V6': 'balance', 'V7': 'housing', 'V8': 'loan',
             'V9': 'contact', 'V10': 'day', 'V11': 'month', 'V12': 'duration',
-            'V13': 'campaign', 'V14': 'pdays', 'V15': 'previous', 'V16': 'poutcome'
+            'V13': 'campaign', 'V14': 'pdays', 'V15': 'previous', 'V16': 'poutcome',
+            'target': 'y'
         }
         self.label_encoders = {}
         self.dummy_columns = {}
@@ -31,22 +33,28 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         Returns:
         DataProcessor: The fitted processor.
         """
+        X_copy = X.copy()
+        
         # Apply column mapping
-        X_mapped = self._apply_column_mapping(X.copy())
+        X_copy = self._apply_column_mapping(X_copy)
+        
+        # Convert target variable from 1/2 to 0/1 if present
+        if 'y' in X_copy.columns:
+            X_copy['y'] = X_copy['y'] - 1
         
         # Fit label encoders for specified categorical columns
         label_encode_cols = self.config.label_encode_columns
         for col in label_encode_cols:
-            if col in X_mapped.columns:
+            if col in X_copy.columns:
                 le = LabelEncoder()
-                le.fit(X_mapped[col].astype(str))
+                le.fit(X_copy[col].astype(str))
                 self.label_encoders[col] = le
         
         # Store one-hot encoding column info by doing a dummy fit
         onehot_cols = self.config.onehot_encode_columns
         for col in onehot_cols:
-            if col in X_mapped.columns:
-                dummies = pd.get_dummies(X_mapped[col], prefix=col, drop_first=False)
+            if col in X_copy.columns:
+                dummies = pd.get_dummies(X_copy[col], prefix=col, drop_first=False)
                 self.dummy_columns[col] = list(dummies.columns)
         
         self.is_fitted = True
@@ -70,11 +78,9 @@ class DataProcessor(BaseEstimator, TransformerMixin):
         # Apply column mapping
         X_transformed = self._apply_column_mapping(X_transformed)
         
-        # Convert target from (1,2) to (0,1) if present
-        if 'target' in X_transformed.columns:
-            X_transformed['target'] = X_transformed['target'] - 1
-            # Rename to y for consistency
-            X_transformed = X_transformed.rename(columns={'target': 'y'})
+        # Convert target variable from 1/2 to 0/1 if present
+        if 'y' in X_transformed.columns:
+            X_transformed['y'] = X_transformed['y'] - 1
         
         # Apply one-hot encoding for specified columns with consistent columns
         onehot_cols = self.config.onehot_encode_columns

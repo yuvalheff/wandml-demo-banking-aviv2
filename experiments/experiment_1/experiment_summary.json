@@ -1,0 +1,174 @@
+{
+  "experiment_info": {
+    "name": "Gradient Boosting with Feature Engineering",
+    "iteration": 1,
+    "objective": "Develop a binary classification model to predict term deposit subscription",
+    "primary_metric": "ROC-AUC",
+    "completed_at": "2025-09-08T17:17:23.391043Z"
+  },
+  "results": {
+    "primary_metric": {
+      "name": "ROC-AUC",
+      "value": 0.9379495402398431,
+      "target": ">0.93",
+      "achieved": true
+    },
+    "key_metrics": {
+      "accuracy": 0.9067,
+      "precision": 0.6404,
+      "recall": 0.4612,
+      "f1_score": 0.5363,
+      "balanced_accuracy": 0.7135,
+      "specificity": 0.9657,
+      "average_precision": 0.6312,
+      "log_loss": 0.1964
+    },
+    "class_performance": {
+      "class_0_no_subscription": {
+        "precision": 0.9312,
+        "recall": 0.9657,
+        "f1_score": 0.9481,
+        "count": 3993,
+        "percentage": 88.3
+      },
+      "class_1_subscription": {
+        "precision": 0.6404,
+        "recall": 0.4612,
+        "f1_score": 0.5363,
+        "count": 529,
+        "percentage": 11.7
+      },
+      "imbalance_ratio": 7.55
+    }
+  },
+  "model_configuration": {
+    "algorithm": "GradientBoostingClassifier",
+    "hyperparameters": {
+      "n_estimators": 200,
+      "max_depth": 6,
+      "learning_rate": 0.1,
+      "random_state": 42
+    },
+    "features_total": 48,
+    "features_original": 16,
+    "feature_engineering": [
+      "Duration-based features (log, short, long)",
+      "Balance-based features (log, negative, zero indicators)",
+      "Campaign features (multiple contacts indicator)",
+      "Previous contact features",
+      "Seasonal features (high/low success months)",
+      "One-hot encoding for job and month categories"
+    ]
+  },
+  "top_features": [
+    {
+      "name": "duration_log",
+      "importance": 0.2200,
+      "description": "Log-transformed call duration - most predictive feature"
+    },
+    {
+      "name": "duration",
+      "importance": 0.1518,
+      "description": "Raw call duration"
+    },
+    {
+      "name": "pdays",
+      "importance": 0.0829,
+      "description": "Days since last contact from previous campaign"
+    },
+    {
+      "name": "poutcome",
+      "importance": 0.0825,
+      "description": "Outcome of previous marketing campaign"
+    },
+    {
+      "name": "age",
+      "importance": 0.0637,
+      "description": "Client age"
+    }
+  ],
+  "strengths": [
+    "Excellent ROC-AUC of 0.938 indicating strong discriminative power",
+    "High overall accuracy of 90.7%",
+    "Feature engineering significantly improved predictive power",
+    "Very high specificity (96.6%) - excellent at identifying non-subscribers",
+    "Strong performance on majority class with F1-score of 94.8%"
+  ],
+  "weaknesses": [
+    "Low recall for minority class (46.1%) - missing 54% of actual subscribers",
+    "Class imbalance significantly impacts minority class performance",
+    "Moderate precision (64.0%) indicates some false positive subscribers",
+    "Balanced accuracy (71.3%) shows room for improvement in minority class handling"
+  ],
+  "key_insights": [
+    "Duration-related features are by far the most important predictors",
+    "Engineered features significantly outperform original raw features",
+    "Previous campaign information (pdays, poutcome) provides strong predictive signal",
+    "Class imbalance (7.55:1) is the primary limiting factor for business impact",
+    "Model excels at avoiding false positives but struggles with false negatives"
+  ],
+  "business_impact": {
+    "positive": [
+      "High specificity reduces wasted effort on unlikely subscribers",
+      "Strong overall accuracy provides confidence in model reliability",
+      "Feature importance insights guide future data collection priorities"
+    ],
+    "challenges": [
+      "Low recall means missing 54% of potential subscribers",
+      "Moderate precision leads to some wasted marketing effort",
+      "Class imbalance limits direct business value despite strong technical metrics"
+    ]
+  },
+  "planning_vs_results": {
+    "hypotheses_validated": [
+      "ROC-AUC >0.93 target achieved (0.938)",
+      "Feature engineering significantly improved performance",
+      "Duration, previous campaigns, and demographics identified as key predictors"
+    ],
+    "unexpected_findings": [
+      "Despite excellent ROC-AUC, recall remains challenging due to class imbalance",
+      "Engineered duration features show even stronger importance than expected",
+      "Monthly seasonal features show modest but consistent importance"
+    ]
+  },
+  "next_iteration_priorities": [
+    {
+      "priority": 1,
+      "focus": "Class Imbalance Handling",
+      "approach": "Implement SMOTE or advanced sampling techniques",
+      "expected_impact": "Improve recall from 46% to 60-70%"
+    },
+    {
+      "priority": 2,
+      "focus": "Threshold Optimization",
+      "approach": "Business-driven cost-sensitive threshold tuning",
+      "expected_impact": "Optimize precision-recall trade-off for business value"
+    },
+    {
+      "priority": 3,
+      "focus": "Ensemble Methods",
+      "approach": "Combine multiple algorithms using stacking/blending",
+      "expected_impact": "Capture complementary patterns for improved performance"
+    }
+  ],
+  "technical_notes": {
+    "debugging_issues": [
+      "Initial sklearn import error for calibration_curve - resolved",
+      "Plotly hovertemplate typo in confusion matrix plot - resolved"
+    ],
+    "artifacts_saved": [
+      "data_processor.pkl",
+      "feature_processor.pkl", 
+      "trained_models.pkl",
+      "MLflow model with full signature"
+    ],
+    "visualizations_created": [
+      "ROC curve",
+      "Precision-recall curve",
+      "Confusion matrix",
+      "Calibration plot",
+      "Feature importance",
+      "Prediction distribution"
+    ]
+  }
+}

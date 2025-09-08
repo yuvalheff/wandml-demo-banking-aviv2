@@ -11,6 +11,7 @@ class FeatureProcessor(BaseEstimator, TransformerMixin):
     def __init__(self, config: FeaturesConfig):
         self.config: FeaturesConfig = config
         self.is_fitted = False
+        self.balance_min = None
 
     def fit(self, X: pd.DataFrame, y: Optional[pd.Series] = None) -> 'FeatureProcessor':
         """
@@ -23,7 +24,10 @@ class FeatureProcessor(BaseEstimator, TransformerMixin):
         Returns:
         FeatureProcessor: The fitted processor.
         """
-        # No fitting required for the feature engineering steps defined
+        # Store balance minimum for log transformation
+        if 'balance' in X.columns:
+            self.balance_min = X['balance'].min()
+        
         self.is_fitted = True
         return self
 
@@ -42,39 +46,36 @@ class FeatureProcessor(BaseEstimator, TransformerMixin):
             
         X_transformed = X.copy()
         
-        # 1. Duration-based features
+        # Duration-based features according to experiment plan
         if 'duration' in X_transformed.columns:
             X_transformed['duration_log'] = np.log1p(X_transformed['duration'])
-            X_transformed['duration_short'] = (X_transformed['duration'] < 100).astype(int)
-            X_transformed['duration_long'] = (X_transformed['duration'] > 500).astype(int)
+            X_transformed['duration_sqrt'] = np.sqrt(X_transformed['duration'])
         
-        # 2. Balance-based features
+        # Balance-based features according to experiment plan
         if 'balance' in X_transformed.columns:
-            X_transformed['balance_log'] = X_transformed['balance'].apply(
-                lambda x: np.log(x) if x > 0 else 0
-            )
-            X_transformed['balance_negative'] = (X_transformed['balance'] < 0).astype(int)
-            X_transformed['balance_zero'] = (X_transformed['balance'] == 0).astype(int)
+            X_transformed['balance_log'] = np.log1p(X_transformed['balance'] - self.balance_min + 1)
+            X_transformed['balance_positive'] = (X_transformed['balance'] > 0).astype(int)
         
-        # 3. Campaign features
-        if 'campaign' in X_transformed.columns:
-            X_transformed['campaign_multiple'] = (X_transformed['campaign'] > 1).astype(int)
+        # Campaign features according to experiment plan
+        if 'campaign' in X_transformed.columns and 'previous' in X_transformed.columns:
+            X_transformed['campaign_per_previous'] = X_transformed['campaign'] / (X_transformed['previous'] + 1)
         
         if 'pdays' in X_transformed.columns:
-            X_transformed['pdays_contacted_before'] = (X_transformed['pdays'] != -1).astype(int)
+            X_transformed['pdays_binary'] = (X_transformed['pdays'] != -1).astype(int)
         
-        # 4. Seasonal features
-        if 'month' in X_transformed.columns:
-            month_high_success = ['mar', 'dec', 'sep']
-            month_low_success = ['may', 'jul', 'jun']
+        # Temporal features - day cyclical encoding
+        if 'day' in X_transformed.columns:
+            day_rad = 2 * np.pi * X_transformed['day'] / 31
+            X_transformed['day_sin'] = np.sin(day_rad)
+            X_transformed['day_cos'] = np.cos(day_rad)
+            X_transformed['is_month_end'] = (X_transformed['day'] >= 28).astype(int)
+        
+        # Interaction features according to experiment plan
+        if 'age' in X_transformed.columns and 'balance' in X_transformed.columns:
+            X_transformed['age_balance_ratio'] = X_transformed['age'] / (np.abs(X_transformed['balance']) + 1)
             
-            X_transformed['month_high_success'] = X_transformed['month'].isin(month_high_success).astype(int)
-            X_transformed['month_low_success'] = X_transformed['month'].isin(month_low_success).astype(int)
-        
-        # 5. Previous outcome features
-        if 'poutcome' in X_transformed.columns:
-            X_transformed['poutcome_success'] = (X_transformed['poutcome'] == 'success').astype(int)
-            X_transformed['poutcome_unknown'] = (X_transformed['poutcome'] == 'unknown').astype(int)
+        if 'duration' in X_transformed.columns and 'campaign' in X_transformed.columns:
+            X_transformed['duration_campaign_ratio'] = X_transformed['duration'] / (X_transformed['campaign'] + 1)
         
         return X_transformed
 

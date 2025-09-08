@@ -5,6 +5,7 @@ import sklearn
 from pathlib import Path
 import os
 import json
+from imblearn.over_sampling import SMOTE
 
 from bank_marketing_term_deposit_prediction.pipeline.feature_preprocessing import FeatureProcessor
 from bank_marketing_term_deposit_prediction.pipeline.data_preprocessing import DataProcessor
@@ -76,12 +77,22 @@ class Experiment:
             X_train_features = feature_processor.transform(X_train)
             print(f"✅ Feature engineering complete. Shape: {X_train_features.shape}")
             
-            # 5. Train model
-            print("🔄 Training model...")
-            model_wrapper.fit(X_train_features, y_train)
+            # 5. Apply SMOTE oversampling to balance training data
+            print("⚖️ Applying SMOTE oversampling...")
+            print(f"Before SMOTE - Class distribution: {np.bincount(y_train)}")
+            
+            smote = SMOTE(k_neighbors=5, random_state=seed)
+            X_train_smote, y_train_smote = smote.fit_resample(X_train_features, y_train)
+            
+            print(f"After SMOTE - Class distribution: {np.bincount(y_train_smote)}")
+            print(f"Training data shape after SMOTE: {X_train_smote.shape}")
+            
+            # 6. Train model on SMOTE-enhanced data
+            print("🔄 Training model on SMOTE-enhanced data...")
+            model_wrapper.fit(X_train_smote, y_train_smote)
             print("✅ Model training complete")
             
-            # 6. Process test data
+            # 7. Process test data
             print("🔄 Processing test data...")
             test_processed = data_processor.transform(test_df)
             y_test = test_processed['y']
@@ -89,7 +100,7 @@ class Experiment:
             X_test_features = feature_processor.transform(X_test)
             print(f"✅ Test data processing complete. Shape: {X_test_features.shape}")
             
-            # 7. Evaluate model
+            # 8. Evaluate model (use original training data for CV to avoid data leakage)
             print("📊 Evaluating model performance...")
             evaluator = ModelEvaluator(self._config.model_evaluation)
             eval_results = evaluator.evaluate_model(
@@ -98,23 +109,23 @@ class Experiment:
             
             print(f"✅ Model evaluation complete. ROC-AUC: {eval_results['roc_auc']:.4f}")
             
-            # 8. Save individual model artifacts 
+            # 9. Save individual model artifacts 
             print("💾 Saving model artifacts...")
             data_processor.save(artifacts_dir / "data_processor.pkl")
             feature_processor.save(artifacts_dir / "feature_processor.pkl")
             model_wrapper.save(artifacts_dir / "trained_models.pkl")
             
-            # 9. Create and test ModelPipeline
+            # 10. Create and test ModelPipeline
             print("🔧 Creating ModelPipeline...")
             pipeline = ModelPipeline(data_processor, feature_processor, model_wrapper)
             
             # Test pipeline with sample data
-            sample_data = test_df.head(3).drop(columns=['target'] if 'target' in test_df.columns else [])
+            sample_data = test_df.head(3).drop(columns=['y'] if 'y' in test_df.columns else [])
             sample_predictions = pipeline.predict(sample_data)
             sample_probabilities = pipeline.predict_proba(sample_data)
             print(f"✅ Pipeline test successful. Sample predictions: {sample_predictions}")
             
-            # 10. Save and conditionally log MLflow model
+            # 11. Save and conditionally log MLflow model
             print("🚀 Saving MLflow model...")
             output_model_path = artifacts_dir / "mlflow_model"
             relative_path_for_return = "output/model_artifacts/mlflow_model/"
@@ -133,7 +144,7 @@ class Experiment:
             )
             
             # Conditionally log to MLflow if run ID is provided
-            active_run_id = "8a6446e4f46c4eddb8935a1db1a86b66"
+            active_run_id = "55d5aadc00d34e5abbe22df6e0c68855"
             logged_model_uri = None
             
             if active_run_id and active_run_id != 'None' and active_run_id.strip():
@@ -154,7 +165,7 @@ class Experiment:
             else:
                 print("ℹ️ No active MLflow run ID provided. Skipping model logging.")
             
-            # 11. Prepare return results
+            # 12. Prepare return results
             model_artifacts = [
                 "data_processor.pkl",
                 "feature_processor.pkl", 

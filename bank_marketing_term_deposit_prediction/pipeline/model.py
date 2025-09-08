@@ -29,21 +29,22 @@ class ModelWrapper:
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
 
-    def fit(self, X: pd.DataFrame, y: pd.Series):
+    def fit(self, X: pd.DataFrame, y):
         """
         Fit the classifier to the training data.
 
         Parameters:
         X: Training features.
-        y: Target labels.
+        y: Target labels (pandas Series or numpy array).
 
         Returns:
         self: Fitted classifier.
         """
         if not isinstance(X, pd.DataFrame):
             raise ValueError("X must be a pandas DataFrame")
-        if not isinstance(y, pd.Series):
-            raise ValueError("y must be a pandas Series")
+        # Accept both pandas Series and numpy arrays
+        if not (isinstance(y, pd.Series) or hasattr(y, '__array__')):
+            raise ValueError("y must be a pandas Series or numpy array")
             
         self.model.fit(X, y)
         self.is_fitted = True
